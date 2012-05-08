@@ -24,7 +24,7 @@ define([
     var SectionSelectorView = Backbone.View.extend({
         render:function () {
             var self = this;
-            utilities.applyTemplate($(this.el), selectSectionTemplate, { sections:_.uniq(_.sortBy(_.pluck(self.model.priceCategories, 'section'), function (item) {
+            utilities.applyTemplate($(this.el), selectSectionTemplate, { sections:_.uniq(_.sortBy(_.pluck(self.model.ticketPrices, 'section'), function (item) {
                 return item.id;
             }), true, function (item) {
                 return item.id;
@@ -61,13 +61,13 @@ define([
             var views = {};
 
             if (this.model != null) {
-                var priceCategories = _.map(this.model, function (item) {
-                    return item.priceCategory;
+                var ticketPrices = _.map(this.model, function (item) {
+                    return item.ticketPrice;
                 });
-                utilities.applyTemplate($(this.el), ticketEntriesTemplate, {priceCategories:priceCategories});
+                utilities.applyTemplate($(this.el), ticketEntriesTemplate, {ticketPrices:ticketPrices});
 
                 _.each(this.model, function (model) {
-                    $("#ticket-category-input-" + model.priceCategory.id).append(new TicketCategoryView({model:model}).render().el);
+                    $("#ticket-category-input-" + model.ticketPrice.id).append(new TicketCategoryView({model:model}).render().el);
 
                 });
             } else {
@@ -104,7 +104,7 @@ define([
             _.each(this.model.bookingRequest.tickets, function (collection) {
                 _.each(collection, function (model) {
                     if (model.quantity != undefined) {
-                        bookingRequest.ticketRequests.push({priceCategory:model.priceCategory.id, quantity:model.quantity})
+                        bookingRequest.ticketRequests.push({ticketPrice:model.ticketPrice.id, quantity:model.quantity})
                     };
                 })
             });
@@ -157,17 +157,17 @@ define([
         },
         refreshPrices:function (event) {
             if (event.currentTarget.value != "Choose a section") {
-                var priceCategories = _.filter(this.model.show.priceCategories, function (item) {
+                var ticketPrices = _.filter(this.model.show.ticketPrices, function (item) {
                     return item.section.id == event.currentTarget.value;
                 });
-                var priceCategoryInputs = new Array();
-                _.each(priceCategories, function (priceCategory) {
+                var ticketPriceInputs = new Array();
+                _.each(ticketPrices, function (ticketPrice) {
                     var model = {};
-                    model.priceCategory = priceCategory;
-                    priceCategoryInputs.push(model);
+                    model.ticketPrice = ticketPrice;
+                    ticketPriceInputs.push(model);
                 });
                 $("#ticketCategoriesViewPlaceholder").show();
-                this.ticketCategoriesView.model = priceCategoryInputs;
+                this.ticketCategoriesView.model = ticketPriceInputs;
                 this.ticketCategoriesView.render();
                 $(this.el).trigger('pagecreate');
             } else {
@@ -186,7 +186,7 @@ define([
             var totals = _.reduce(this.ticketCategoriesView.model, function (partial, model) {
                 if (model.quantity != undefined) {
                     partial.tickets += model.quantity;
-                    partial.price += model.quantity * model.priceCategory.price;
+                    partial.price += model.quantity * model.ticketPrice.price;
                     return partial;
                 }
             }, {tickets:0, price:0.0});
